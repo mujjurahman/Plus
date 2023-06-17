@@ -2,3 +2,7 @@ D:\xampp\htdocs\pfpfpfizerfr\app\profiles\pfpfpfizerfr_profile\modules\pfe_med_c
 nom_du_medicament_ou_produit
 aire_therapeutique
 departement
+
+If the HCP selects the product and keep the therapeutics area field empty, then the algo will search for the MSL and backup email addresses that match the product & district filled in by the HCP and send an email to them.
+If the HCP selects the therapeutics area and keep the Product field empty, then the algo will search for the MSL and backup email addresses matching the therapeutic area & district selected by the HCP and for which the product field is empty and send an email to them.
+If the HCP selects the product and therapeutics area, then the algo will search for the MSL and backup email addresses matching the product & district selected by the HCP and send an email to them.
