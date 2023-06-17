@@ -1,0 +1,1 @@
+drush sget system.test_mail_collector --format=var_dump Update {{ mail System > Sender configuration to "Mail collector" }}
