@@ -10,18 +10,18 @@ use Drupal\webform\WebformSubmissionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form submission handler.
+ * Custom webform submission handler.
  *
  * @WebformHandler(
- *   id = "custom_email_handler",
- *   label = @Translation("Custom email handler"),
- *   category = @Translation("Email"),
- *   description = @Translation("Sends custom emails."),
- *   cardinality = \Drupal\webform\Plugin\WebformHandlerBase::CARDINALITY_SINGLE,
- *   results = \Drupal\webform\Plugin\WebformHandlerBase::RESULTS_PROCESSED,
+ *   id = "custom_webform_handler",
+ *   label = @Translation("Custom handler"),
+ *   category = @Translation("Custom"),
+ *   description = @Translation("Custom webform submission handler."),
+ *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
+ *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
  * )
  */
-class CustomEmailHandler extends WebformHandlerBase {
+class CustomWebformHandler extends WebformHandlerBase {
 
   /**
    * The mail manager.
@@ -31,34 +31,56 @@ class CustomEmailHandler extends WebformHandlerBase {
   protected $mailManager;
 
   /**
-   * Constructs the CustomEmailHandler.
-   *
-   * @param \Drupal\Core\Mail\MailManagerInterface $mail_manager
-   *   The mail manager.
-   */
-  public function __construct(MailManagerInterface $mail_manager) {
-    $this->mailManager = $mail_manager;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $container->get('plugin.manager.mail')
-    );
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->mailManager = $container->get('plugin.manager.mail');
+    return $instance;
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-    // Get the submission values.
     $values = $webform_submission->getData();
+    $product = $values['nom_du_medicament_ou_produit'];  
+    $therapeutic_area = $values['aire_therapeutique'];  
+    $department = $values['departement']; 
 
-    // Add your logic to query the custom_table for the email addresses here.
-    // If the required conditions are met, send the email.
-    // ...
+    if (empty($department)) {
+      // If no department, do not send an email.
+      return;
+    }
+
+    // Retrieve email addresses from the custom table.
+    $query = \Drupal::database()->select('custom_table', 'ct');
+    $query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
+    $query->condition('ct.Produit', $product);
+    $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+    $query->condition('ct.Departement', $department);
+    $result = $query->execute()->fetchAssoc();
+
+    if ($result) {
+      $this->sendEmail('RMR_adresse_email', $result['RMR_adresse_email'], $values);
+      $this->sendEmail('Backup_adresse_email', $result['Backup_adresse_email'], $values);
+    }
   }
 
+  /**
+   * Sends an email.
+   *
+   * @param string $key
+   *   The email key.
+   * @param string $emailAddress
+   *   The email address.
+   * @param array $values
+   *   The form submission data.
+   */
+  private function sendEmail($key, $emailAddress, array $values) {
+    $langcode = \Drupal::currentUser()->getPreferredLangcode();
+    $params = ['values' => $values];
+
+    $this->mailManager->mail('pfe_med_connect', $key, $emailAddress, $langcode, $params);
+  }
 }
