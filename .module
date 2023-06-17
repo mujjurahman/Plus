@@ -1,20 +1,38 @@
 /**
+ * @file
+ * Contains pfe_med_connect.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function pfe_med_connect_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the pfe_med_connect module.
+    case 'help.page.pfe_med_connect':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Custom Webform Handler for PFE Med Connect module.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
  * Implements hook_mail().
  */
 function pfe_med_connect_mail($key, &$message, $params) {
   $options = array(
     'langcode' => $message['langcode'],
   );
-
   switch ($key) {
     case 'notification':
       $message['from'] = \Drupal::config('system.site')->get('mail');
-      $message['subject'] = t('@product - @therapeutic_area - @department', [
-        '@product' => $params['values']['nom_du_medicament_ou_produit'],
-        '@therapeutic_area' => $params['values']['aire_therapeutique'],
-        '@department' => $params['values']['departement'],
-      ], $options);
-      $message['body'][] = t('New submission: @data', ['@data' => print_r($params['values'], TRUE)], $options);
+      $message['subject'] = t('@subject', ['@subject' => 'Notification'], $options);
+      $message['body'][] = t('@body', ['@body' => 'You have received a new submission.'], $options);
       break;
   }
 }
