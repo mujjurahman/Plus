@@ -17,9 +17,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("Custom email handler"),
  *   category = @Translation("Email"),
  *   description = @Translation("Sends custom emails."),
- *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
- *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
- *   submission = \Drupal\webform\Plugin\WebformHandlerInterface::SUBMISSION_REQUIRED,
+ *   cardinality = \Drupal\webform\Plugin\WebformHandlerBase::CARDINALITY_SINGLE,
+ *   results = \Drupal\webform\Plugin\WebformHandlerBase::RESULTS_PROCESSED,
  * )
  */
 class CustomEmailHandler extends WebformHandlerBase {
