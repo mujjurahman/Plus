@@ -1,0 +1,20 @@
+/**
+ * Implements hook_mail().
+ */
+function pfe_med_connect_mail($key, &$message, $params) {
+  $options = array(
+    'langcode' => $message['langcode'],
+  );
+
+  switch ($key) {
+    case 'notification':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('@product - @therapeutic_area - @department', [
+        '@product' => $params['values']['nom_du_medicament_ou_produit'],
+        '@therapeutic_area' => $params['values']['aire_therapeutique'],
+        '@department' => $params['values']['departement'],
+      ], $options);
+      $message['body'][] = t('New submission: @data', ['@data' => print_r($params['values'], TRUE)], $options);
+      break;
+  }
+}
