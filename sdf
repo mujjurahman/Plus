@@ -21,6 +21,15 @@ public function __construct(MailManagerInterface $mail_manager, RendererInterfac
 }
 
 
+/**
+ * {@inheritdoc}
+ */
+public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  return new static(
+    $container->get('plugin.manager.mail'),
+    $container->get('renderer')
+  );
+}
 
 
 
