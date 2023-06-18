@@ -1,4 +1,24 @@
-TypeError: Drupal\pfe_med_connect\Plugin\WebformHandler\TestHandler::__construct(): Argument #1 ($mail_manager) must be of type Drupal\core\Mail\MailManagerInterface, array given, called in D:\xampp\htdocs\pfpfpfizerfr\app\modules\contrib\webform\src\Plugin\WebformHandlerBase.php on line 141 in Drupal\pfe_med_connect\Plugin\WebformHandler\TestHandler->__construct() (line 43 of profiles\pfpfpfizerfr_profile\modules\pfe_med_connect\src\Plugin\WebformHandler\TestHandler.php).
+/**
+ * The mail manager service.
+ *
+ * @var \Drupal\Core\Mail\MailManagerInterface
+ */
+protected $mailManager;
+
+/**
+ * The renderer service.
+ *
+ * @var \Drupal\Core\Render\RendererInterface
+ */
+protected $renderer;
+
+/**
+ * {@inheritdoc}
+ */
+public function __construct(MailManagerInterface $mail_manager, RendererInterface $renderer) {
+  $this->mailManager = $mail_manager;
+  $this->renderer = $renderer;
+}
 
 
 
