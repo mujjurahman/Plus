@@ -29,5 +29,6 @@ Département
 
 mail,page not found,pfizer_key,pfizer_performance,phpswiftmailer,system,webform_submission
 
-
+  // Log that the method was called.
+  \Drupal::logger('pfe_med_connect')->notice('submitForm called.');
 
