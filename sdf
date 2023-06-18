@@ -1,15 +1,18 @@
-public function __construct(array $configuration, $plugin_id, $plugin_definition, MailManagerInterface $mail_manager, RendererInterface $renderer) {
-  parent::__construct($configuration, $plugin_id, $plugin_definition);
-  $this->mailManager = $mail_manager;
-  $this->renderer = $renderer;
-  \Drupal::logger('pfe_med_connect')->notice('CustomEmailHandler constructed.');
-}
-public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-  return new static(
-    $configuration,
-    $plugin_id,
-    $plugin_definition,
-    $container->get('plugin.manager.mail'),
-    $container->get('renderer')
-  );
-}
+Bonjour 
+
+Vous venez de recevoir une sollicitation de la part d’un professionnel de santé exerçant dans votre région. Merci de vérifier la véracité des informations ci-dessous (nom, prénom, RPPS) et prendre contact avec lui dans les plus bref délais.
+
+Civilité : 
+Prénom : 
+Nom : 
+Adresse email : 
+RPPS : 
+Pays : 
+Département :  
+Message : 
+
+Bien cordialement,
+Pfizer Médical
+
+Bien à toi,
+Adel
