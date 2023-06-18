@@ -1,0 +1,30 @@
+/**
+ * {@inheritdoc}
+ */
+public function __construct(MailManagerInterface $mail_manager, RendererInterface $renderer) {
+  try {
+    $this->mailManager = $mail_manager;
+    \Drupal::logger('pfe_med_connect')->notice('Mail manager instantiated correctly.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('pfe_med_connect')->error('Error instantiating mail manager: ' . $e->getMessage());
+  }
+
+  try {
+    $this->renderer = $renderer;
+    \Drupal::logger('pfe_med_connect')->notice('Renderer instantiated correctly.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('pfe_med_connect')->error('Error instantiating renderer: ' . $e->getMessage());
+  }
+}
+
+/**
+ * {@inheritdoc}
+ */
+public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  return new static(
+    $container->get('plugin.manager.mail'),
+    $container->get('renderer')
+  );
+}
