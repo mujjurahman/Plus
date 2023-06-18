@@ -1,138 +1,15 @@
-/**
- * The mail manager service.
- *
- * @var \Drupal\Core\Mail\MailManagerInterface
- */
-protected $mailManager;
-
-/**
- * The renderer service.
- *
- * @var \Drupal\Core\Render\RendererInterface
- */
-protected $renderer;
-
-/**
- * {@inheritdoc}
- */
-public function __construct(MailManagerInterface $mail_manager, RendererInterface $renderer) {
+public function __construct(array $configuration, $plugin_id, $plugin_definition, MailManagerInterface $mail_manager, RendererInterface $renderer) {
+  parent::__construct($configuration, $plugin_id, $plugin_definition);
   $this->mailManager = $mail_manager;
   $this->renderer = $renderer;
+  \Drupal::logger('pfe_med_connect')->notice('CustomEmailHandler constructed.');
 }
-
-
-/**
- * {@inheritdoc}
- */
 public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
   return new static(
+    $configuration,
+    $plugin_id,
+    $plugin_definition,
     $container->get('plugin.manager.mail'),
     $container->get('renderer')
   );
 }
-
-/**
- * {@inheritdoc}
- */
-public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-  // Log that the method was called.
-  \Drupal::logger('pfe_med_connect')->notice('submitForm called.');    
-  $values = $webform_submission->getData();
-  // DEBUG: Log the form data.
-  \Drupal::logger('pfe_med_connect')->notice('Form data: <pre>@data</pre>', ['@data' => print_r($values, TRUE)]);  
-
-  // Get the form values.
-  $product = $values['nom_du_medicament_ou_produit'];
-  $therapeutic_area = $values['aire_therapeutique'];
-  $department = $values['departement'];
-
-  // Query the database.
-  $query = \Drupal::database()->select('custom_table', 'ct');
-
-  // Add the condition for the department.
-  $query->condition('ct.Department', $department);
-
-  if (!empty($product) && empty($therapeutic_area)) {
-    // Scenario 1: The user selects the product and keeps the therapeutics area field empty.
-    $query->condition('ct.Produit', $product);
-  }
-  elseif (empty($product) && !empty($therapeutic_area)) {
-    // Scenario 2: The user selects the therapeutics area and keeps the Product field empty.
-    $query->condition('ct.Aire_therapeutique', $therapeutic_area);
-    $query->isNull('ct.Produit');
-  }
-  else {
-    // Scenario 3: The user selects the product and therapeutics area.
-    $query->condition('ct.Produit', $product);
-    $query->condition('ct.Aire_therapeutique', $therapeutic_area);
-  }
-
-  $query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
-
-  $results = $query->execute()->fetchAll();
-
-  if (!empty($results)) {
-    // Prepare the mail parameters.
-    $params = [
-      'values' => $values,
-    ];
-
-    foreach ($results as $result) {
-      // Send a mail to the MSL email.
-      $this->mailManager->mail('pfe_med_connect', 'notification', $result->RMR_adresse_email, 'en', $params);
-
-      // Send a mail to the Backup email.
-      $this->mailManager->mail('pfe_med_connect', 'notification', $result->Backup_adresse_email, 'en', $params);
-    }
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Vydura (rimegepant)
-Migraine
-01 - Ain
-mujeeb.mahammad@pfizer.com
-mujeeb.mahammad@pfizer.com
-// The query is a Select object at this point, so __toString will give the SQL string.
-echo((string) $query);
-// This will output the array of arguments.
-print_r($query->arguments());
-
-
-  // Debugging the query
-  $sql_query = (string) $query;
-  $args = $query->arguments();
-  \Drupal::logger('my_module')->notice('SQL Query: ' . $sql_query);
-  \Drupal::logger('my_module')->notice('Arguments: ' . print_r($args, TRUE));
-pfizer_performance	06/18/2023 - 13:28	Request came through without being routed through…	pfizer-admin	
-Nom du médicament ou produit 
-Aire Thérapeutique 
-Département
-
-    // DEBUG: Log the form data.
-    \Drupal::logger('my_module')->notice('Form data: <pre>@data</pre>', ['@data' => print_r($values, TRUE)]);
-
-    // Get the form values.
-    $product = $values['nom_du_medicament_ou_produit'];
-    $therapeutic_area = $values['aire_therapeutique'];
-    $department = $values['departement'];
-
-mail,page not found,pfizer_key,pfizer_performance,phpswiftmailer,system,webform_submission
-
-  // Log that the method was called.
-  \Drupal::logger('pfe_med_connect')->notice('submitForm called.');
-
-Warning: Trying to access array offset on value of type null in Drupal\swiftmailer\TransportFactory->getTransport() (line 81 of D:\xampp\htdocs\pfpfpfizerfr\app\modules\contrib\swiftmailer\src\TransportFactory.php)
