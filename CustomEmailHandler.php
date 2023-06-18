@@ -1,3 +1,5 @@
+<?php
+
 namespace Drupal\pfe_med_connect\Plugin\WebformHandler;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -67,6 +69,9 @@ class CustomWebformHandler extends WebformHandlerBase {
     // Query the database.
     $query = \Drupal::database()->select('custom_table', 'ct');
 
+    // Add the condition for the department.
+    $query->condition('ct.Department', $department);
+
     if (!empty($product) && empty($therapeutic_area)) {
       // Scenario 1: The user selects the product and keeps the therapeutics area field empty.
       $query->condition('ct.Produit', $product);
@@ -74,15 +79,12 @@ class CustomWebformHandler extends WebformHandlerBase {
     elseif (empty($product) && !empty($therapeutic_area)) {
       // Scenario 2: The user selects the therapeutics area and keeps the Product field empty.
       $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+      $query->isNull('ct.Produit');
     }
     else {
       // Scenario 3: The user selects the product and therapeutics area.
       $query->condition('ct.Produit', $product);
-    }
-
-    // Add the condition for the department, if it exists.
-    if (!empty($department)) {
-      $query->condition('ct.Department', $department);
+      $query->condition('ct.Aire_therapeutique', $therapeutic_area);
     }
 
     $query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
