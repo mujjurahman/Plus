@@ -1,0 +1,31 @@
+<?php
+
+namespace Drupal\pfe_med_connect\Plugin\WebformHandler;
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\webform\Plugin\WebformHandlerBase;
+use Drupal\webform\WebformSubmissionInterface;
+
+/**
+ * Test form submission handler.
+ *
+ * @WebformHandler(
+ *   id = "med_connect_test_handler",
+ *   label = @Translation("Med Connect Test Handler"),
+ *   category = @Translation("Email"),
+ *   description = @Translation("A simple test handler."),
+ *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
+ *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
+ * )
+ */
+class TestHandler extends WebformHandlerBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
+    // Log that the method was called.
+    \Drupal::logger('pfe_med_connect')->notice('TestHandler was called.');    
+  }
+
+}
