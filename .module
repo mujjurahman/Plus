@@ -1,3 +1,161 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Database\Database;
+use Drupal\Core\Database\SchemaException;
+use Drupal\Core\Database\Query\Condition;
+use Drupal\Core\Database\Query\Select;
+use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\file\Entity\File;
+
+/**
+ * Implements hook_install().
+ */
+function pfe_med_connect_install() {
+  pfe_med_connect_create_table();
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function pfe_med_connect_update_8001() {
+  pfe_med_connect_create_table();
+}
+
+/**
+ * Create the custom table.
+ */
+function pfe_med_connect_create_table() {
+  $table_name = 'custom_table';
+  $schema = \Drupal::database()->schema();
+
+  try {
+    if ($schema->tableExists($table_name)) {
+      $schema->dropTable($table_name);
+    }
+    $schema->createTable($table_name, pfe_med_connect_get_table_schema());
+    \Drupal::messenger()->addMessage('Created the custom table.');
+  }
+  catch (SchemaException $e) {
+    \Drupal::messenger()->addError('Failed to create the custom table: ' . $e->getMessage());
+  }
+}
+
+/**
+ * Get the schema definition for the custom table.
+ */
+function pfe_med_connect_get_table_schema() {
+  $schema = [
+    'description' => 'Custom table for storing data.',
+    'fields' => [
+      'Produit' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The product name.',
+      ],
+      'Aire_therapeutique' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The therapeutic area.',
+      ],
+      'Departement' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The district.',
+      ],
+      'RMR_adresse_email' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The MSL email address.',
+      ],
+      'Backup_adresse_email' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The backup email address.',
+      ],
+    ],
+    'primary key' => ['Produit', 'Aire_therapeutique', 'Departement'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the custom form.
+ */
+function pfe_med_connect_form_pfe_med_connect_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['#submit'][] = 'pfe_med_connect_form_submit';
+}
+
+/**
+ * Form submission handler for the custom form.
+ */
+function pfe_med_connect_form_submit(&$form, FormStateInterface $form_state) {
+  $csv_file = $form_state->getValue('csv_file');
+
+  if (!empty($csv_file)) {
+    $file = File::load($csv_file->id());
+
+    if ($file) {
+      $file_path = $file->getFileUri();
+
+      // Process the CSV file.
+      $data = pfe_med_connect_process_csv_file($file_path);
+
+      if (!empty($data)) {
+        // Truncate the custom_table before inserting new data.
+        pfe_med_connect_truncate_table();
+
+        // Insert the data into the custom_table.
+        pfe_med_connect_insert_data($data);
+
+        \Drupal::messenger()->addMessage('CSV data has been processed and stored in the custom_table.');
+      } else {
+        \Drupal::messenger()->addError('Failed to process the CSV file or no data found.');
+      }
+    } else {
+      \Drupal::messenger()->addError('Failed to load the uploaded file.');
+    }
+  } else {
+    \Drupal::messenger()->addError('No CSV file uploaded.');
+  }
+}
+
+/**
+ * Process the CSV file and return the data as an array.
+ */
+function pfe_med_connect_process_csv_file($file_path) {
+  $data = [];
+
+  if (($handle = fopen($file_path, 'r')) !== FALSE) {
+    while (($row = fgetcsv($handle, 1000, ',')) !== FALSE) {
+      // Skip the header row.
+      if ($row[0] !== 'Produit') {
+        $data[] = [
+          'Produit' => $row[0],
+          'Aire_therapeutique' => $row[1],
+          'Departement' => $row[2],
+          'RMR_adresse_email' => $row[3],
+          'Backup_adresse_email' => $row[4],
+        ];
+      }
+    }
+
+    fclose($handle);
+  }
+
+  return $data;
+}
+
 /**
  * @file
  * Contains pfe_med_connect.module.
@@ -34,5 +192,46 @@ function pfe_med_connect_mail($key, &$message, $params) {
       $message['subject'] = t('@subject', ['@subject' => 'Notification'], $options);
       $message['body'][] = t('@body', ['@body' => 'You have received a new submission.'], $options);
       break;
+  }
+}
+
+/**
+ * Truncate the custom_table.
+ */
+function pfe_med_connect_truncate_table() {
+  $table_name = 'custom_table';
+
+  try {
+    $connection = Database::getConnection();
+    $connection->truncate($table_name)->execute();
+  }
+  catch (DatabaseException $e) {
+    \Drupal::messenger()->addError('Failed to truncate the custom_table: ' . $e->getMessage());
+  }
+}
+
+/**
+ * Insert the data into the custom_table.
+ */
+function pfe_med_connect_insert_data($data) {
+  $table_name = 'custom_table';
+
+  try {
+    $connection = Database::getConnection();
+    foreach ($data as $row) {
+      $connection->insert($table_name)
+        ->fields([
+          'Produit' => $row['Produit'],
+          'Aire_therapeutique' => $row['Aire_therapeutique'],
+          'Departement' => $row['Departement'],
+          'RMR_adresse_email' => $row['RMR_adresse_email'],
+          'Backup_adresse_email' => $row['Backup_adresse_email'],
+        ])
+        ->execute();
+      \Drupal::messenger()->addMessage('Inserted row: ' . print_r($row, true));
+    }
+  }
+  catch (DatabaseException $e) {
+    \Drupal::messenger()->addError('Failed to insert data into the custom_table: ' . $e->getMessage());
   }
 }
