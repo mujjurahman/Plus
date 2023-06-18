@@ -32,3 +32,4 @@ mail,page not found,pfizer_key,pfizer_performance,phpswiftmailer,system,webform_
   // Log that the method was called.
   \Drupal::logger('pfe_med_connect')->notice('submitForm called.');
 
+Warning: Trying to access array offset on value of type null in Drupal\swiftmailer\TransportFactory->getTransport() (line 81 of D:\xampp\htdocs\pfpfpfizerfr\app\modules\contrib\swiftmailer\src\TransportFactory.php)
