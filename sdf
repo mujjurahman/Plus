@@ -18,3 +18,12 @@ pfizer_performance	06/18/2023 - 13:28	Request came through without being routed 
 Nom du médicament ou produit 
 Aire Thérapeutique 
 Département
+
+    // DEBUG: Log the form data.
+    \Drupal::logger('my_module')->notice('Form data: <pre>@data</pre>', ['@data' => print_r($values, TRUE)]);
+
+    // Get the form values.
+    $product = $values['nom_du_medicament_ou_produit'];
+    $therapeutic_area = $values['aire_therapeutique'];
+    $department = $values['departement'];
+
