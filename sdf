@@ -1,13 +1,4 @@
-drush webform:handler:add [webform_id] med_connect_handler
-  There are no commands defined in the "webform:handler" namespace.
-
-  Did you mean one of these?
-      webform
-      webform:composer
-      webform:generate
-      webform:libraries
-      webform:remove
-
+TypeError: Drupal\pfe_med_connect\Plugin\WebformHandler\TestHandler::__construct(): Argument #1 ($mail_manager) must be of type Drupal\core\Mail\MailManagerInterface, array given, called in D:\xampp\htdocs\pfpfpfizerfr\app\modules\contrib\webform\src\Plugin\WebformHandlerBase.php on line 141 in Drupal\pfe_med_connect\Plugin\WebformHandler\TestHandler->__construct() (line 43 of profiles\pfpfpfizerfr_profile\modules\pfe_med_connect\src\Plugin\WebformHandler\TestHandler.php).
 
 
 
