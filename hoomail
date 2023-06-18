@@ -1,0 +1,39 @@
+/**
+ * Implements hook_mail().
+ */
+function pfe_med_connect_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'notification':
+      $message['subject'] = t('MedConnect: Proposition du corps du message qui sera envoyé au MSL et son backup');
+      
+      // You need to replace 'field_key' with the actual field keys from your form.
+      $message['body'][] = t('Bonjour,
+
+Vous venez de recevoir une sollicitation de la part d’un professionnel de santé exerçant dans votre région. Merci de vérifier la véracité des informations ci-dessous (nom, prénom, RPPS) et prendre contact avec lui dans les plus bref délais.
+
+Civilité : @civilite
+Prénom : @prenom
+Nom : @nom
+Adresse email : @email
+RPPS : @rpps
+Pays : @pays
+Département :  @departement
+Message : @message
+
+Bien cordialement,
+Pfizer Médical
+
+Bien à toi,
+Adel', [
+        '@civilite' => $params['values']['civilite_field_key'],
+        '@prenom' => $params['values']['prenom_field_key'],
+        '@nom' => $params['values']['nom_field_key'],
+        '@email' => $params['values']['email_field_key'],
+        '@rpps' => $params['values']['rpps_field_key'],
+        '@pays' => $params['values']['pays_field_key'],
+        '@departement' => $params['values']['departement_field_key'],
+        '@message' => $params['values']['message_field_key'],
+      ]);
+      break;
+  }
+}
