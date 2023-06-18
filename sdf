@@ -14,3 +14,4 @@ print_r($query->arguments());
   $args = $query->arguments();
   \Drupal::logger('my_module')->notice('SQL Query: ' . $sql_query);
   \Drupal::logger('my_module')->notice('Arguments: ' . print_r($args, TRUE));
+pfizer_performance	06/18/2023 - 13:28	Request came through without being routed through…	pfizer-admin	
