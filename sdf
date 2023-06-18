@@ -7,3 +7,10 @@ mujeeb.mahammad@pfizer.com
 echo((string) $query);
 // This will output the array of arguments.
 print_r($query->arguments());
+
+
+  // Debugging the query
+  $sql_query = (string) $query;
+  $args = $query->arguments();
+  \Drupal::logger('my_module')->notice('SQL Query: ' . $sql_query);
+  \Drupal::logger('my_module')->notice('Arguments: ' . print_r($args, TRUE));
