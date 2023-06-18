@@ -2,9 +2,9 @@
  * Form submission handler.
  *
  * @WebformHandler(
- *   id = "custom_webform_handler",
- *   label = @Translation("Custom webform handler"),
- *   category = @Translation("Custom"),
+ *   id = "med_connect_handler",
+ *   label = @Translation("med connect webform handler"),
+ *   category = @Translation("Email"),
  *   description = @Translation("Handles the form submission."),
  *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
  *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
