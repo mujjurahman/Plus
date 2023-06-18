@@ -3,3 +3,7 @@ Migraine
 01 - Ain
 mujeeb.mahammad@pfizer.com
 mujeeb.mahammad@pfizer.com
+// The query is a Select object at this point, so __toString will give the SQL string.
+echo((string) $query);
+// This will output the array of arguments.
+print_r($query->arguments());
