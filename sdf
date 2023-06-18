@@ -27,3 +27,7 @@ Département
     $therapeutic_area = $values['aire_therapeutique'];
     $department = $values['departement'];
 
+mail,page not found,pfizer_key,pfizer_performance,phpswiftmailer,system,webform_submission
+
+
+
