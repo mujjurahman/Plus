@@ -1,17 +1,21 @@
-<?php
+public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
+    // Log that the method was called.
+    \Drupal::logger('pfe_med_connect')->notice('submitForm called.');    
+  
+    // Check the 'plugin.manager.mail' service.
+    $mailManager = \Drupal::service('plugin.manager.mail');
+    if (isset($mailManager)) {
+      \Drupal::logger('pfe_med_connect')->notice('plugin.manager.mail exists and is working correctly.');
+    } else {
+      \Drupal::logger('pfe_med_connect')->error('plugin.manager.mail does not exist or is not working correctly.');
+    }
 
-// Check the 'plugin.manager.mail' service.
-$mailManager = \Drupal::service('plugin.manager.mail');
-if (isset($mailManager)) {
-  \Drupal::logger('my_module')->notice('plugin.manager.mail exists and is working correctly.');
-} else {
-  \Drupal::logger('my_module')->error('plugin.manager.mail does not exist or is not working correctly.');
-}
-
-// Check the 'renderer' service.
-$renderer = \Drupal::service('renderer');
-if (isset($renderer)) {
-  \Drupal::logger('my_module')->notice('renderer exists and is working correctly.');
-} else {
-  \Drupal::logger('my_module')->error('renderer does not exist or is not working correctly.');
-}
+    // Check the 'renderer' service.
+    $renderer = \Drupal::service('renderer');
+    if (isset($renderer)) {
+      \Drupal::logger('pfe_med_connect')->notice('renderer exists and is working correctly.');
+    } else {
+      \Drupal::logger('pfe_med_connect')->error('renderer does not exist or is not working correctly.');
+    }
+    
+    // Rest
