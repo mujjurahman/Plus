@@ -1,27 +1,19 @@
 <?php
 
-namespace Drupal\pfe_med_connect\Plugin\WebformHandler;
+namespace Drupal\pfe_med_connect\Form;
 
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\webform\Plugin\WebformHandlerBase;
-use Drupal\webform\WebformSubmissionInterface;
+use Drupal\Core\Database\Database;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form submission handler.
- *
- * @WebformHandler(
- *   id = "med_connect_handler",
- *   label = @Translation("med connect webform handler"),
- *   category = @Translation("Email"),
- *   description = @Translation("Handles the form submission."),
- *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
- *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
- * )
+ * Implements the Custom Form.
  */
-class CustomWebformHandler extends WebformHandlerBase {
+class CustomForm extends FormBase {
 
   /**
    * The mail manager service.
@@ -38,7 +30,7 @@ class CustomWebformHandler extends WebformHandlerBase {
   protected $renderer;
 
   /**
-   * {@inheritdoc}
+   * Class constructor.
    */
   public function __construct(MailManagerInterface $mail_manager, RendererInterface $renderer) {
     $this->mailManager = $mail_manager;
@@ -48,7 +40,7 @@ class CustomWebformHandler extends WebformHandlerBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.mail'),
       $container->get('renderer')
@@ -58,56 +50,36 @@ class CustomWebformHandler extends WebformHandlerBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-    // Log that the method was called.
-    \Drupal::logger('pfe_med_connect')->notice('submitForm called.');    
-    $values = $webform_submission->getData();
-    // DEBUG: Log the form data.
-    \Drupal::logger('pfe_med_connect')->notice('Form data: <pre>@data</pre>', ['@data' => print_r($values, TRUE)]);  
+  public function getFormId() {
+    return 'pfe_med_connect_form';
+  }
 
-    // Get the form values.
-    $product = $values['nom_du_medicament_ou_produit'];
-    $therapeutic_area = $values['aire_therapeutique'];
-    $department = $values['departement'];
+  // The rest of your code follows...
 
-    // Query the database.
-    $query = \Drupal::database()->select('custom_table', 'ct');
+  /**
+   * Sends emails to the retrieved email addresses.
+   *
+   * @param array $emailAddresses
+   *   An array of email addresses to send emails to.
+   */
+  private function sendEmails(array $emailAddresses) {
+    foreach ($emailAddresses as $email) {
+      $module = 'pfe_med_connect';
+      $key = 'send_mail';
+      $to = $email;
+      $params['message'] = 'This is a test message';
+      $params['title'] = 'Test email from pfe_med_connect';
+      $langcode = \Drupal::currentUser()->getPreferredLangcode();
+      $send = TRUE;
 
-    // Add the condition for the department.
-    $query->condition('ct.Department', $department);
+      $result = $this->mailManager->mail($module, $key, $to, $langcode, $params, NULL, $send);
 
-    if (!empty($product) && empty($therapeutic_area)) {
-      // Scenario 1: The user selects the product and keeps the therapeutics area field empty.
-      $query->condition('ct.Produit', $product);
-    }
-    elseif (empty($product) && !empty($therapeutic_area)) {
-      // Scenario 2: The user selects the therapeutics area and keeps the Product field empty.
-      $query->condition('ct.Aire_therapeutique', $therapeutic_area);
-      $query->isNull('ct.Produit');
-    }
-    else {
-      // Scenario 3: The user selects the product and therapeutics area.
-      $query->condition('ct.Produit', $product);
-      $query->condition('ct.Aire_therapeutique', $therapeutic_area);
-    }
-
-    $query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
-
-    $results = $query->execute()->fetchAll();
-
-    if (!empty($results)) {
-      // Prepare the mail parameters.
-      $params = [
-        'values' => $values,
-      ];
-
-      foreach ($results as $result) {
-        // Send a mail to the MSL email.
-        $this->mailManager->mail('pfe_med_connect', 'notification', $result->RMR_adresse_email, 'en', $params);
-
-        // Send a mail to the Backup email.
-        $this->mailManager->mail('pfe_med_connect', 'notification', $result->Backup_adresse_email, 'en', $params);
+      if ($result['result'] !== TRUE) {
+        \Drupal::logger('pfe_med_connect')->error('There was a problem sending mail to %email', ['%email' => $email]);
+      } else {
+        \Drupal::logger('pfe_med_connect')->notice('Mail successfully sent to %email', ['%email' => $email]);
       }
     }
   }
+
 }
