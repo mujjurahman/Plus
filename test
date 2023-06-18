@@ -1,15 +1,8 @@
-
-
-pfe_med_connect	06/18/2023 - 22:56	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	No results found.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	Query results: Array ( )	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	The SQL query: SELECT "ct"."RMR_adresse_email" AS "…	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	Extracted form values: Product - Vydura (rimegepant),…	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	Form data: Array ( [subject] => […	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	submitForm called.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:55	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:54	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:54	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:54	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:54	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 22:54	CustomEmailHandler constructed.	pfizer-admin
+	pfe_med_connect	06/18/2023 - 23:23	CustomEmailHandler constructed.	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:21	Emails sent.	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	Query results: Array ( [0] => stdClass Object…	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	The SQL query: SELECT "ct"."RMR_adresse_email" AS "…	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	Extracted form values: Product - Vydura (rimegepant),…	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	Form data: Array ( [subject] => […	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	submitForm called.	pfizer-admin	
+pfe_med_connect	06/18/2023 - 23:20	CustomEmailHandler constructed.	pfizer-admin	
