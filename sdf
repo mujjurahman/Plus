@@ -1,4 +1,13 @@
 drush webform:handler:add [webform_id] med_connect_handler
+  There are no commands defined in the "webform:handler" namespace.
+
+  Did you mean one of these?
+      webform
+      webform:composer
+      webform:generate
+      webform:libraries
+      webform:remove
+
 
 
 
