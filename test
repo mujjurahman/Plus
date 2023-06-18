@@ -1,2 +1,12 @@
-drush sget system.test_mail_collector --format=var_dump Update {{ mail System > Sender configuration to "Mail collector" }}
-drush sget system.test_mail_collector --format=var_dump 
+/**
+ * Form submission handler.
+ *
+ * @WebformHandler(
+ *   id = "custom_webform_handler",
+ *   label = @Translation("Custom webform handler"),
+ *   category = @Translation("Custom"),
+ *   description = @Translation("Handles the form submission."),
+ *   cardinality = \Drupal\webform\Plugin\WebformHandlerInterface::CARDINALITY_SINGLE,
+ *   results = \Drupal\webform\Plugin\WebformHandlerInterface::RESULTS_PROCESSED,
+ * )
+ */
