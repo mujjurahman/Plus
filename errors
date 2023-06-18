@@ -1,58 +1,51 @@
-public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-  try {
-    \Drupal::logger('pfe_med_connect')->notice('submitForm was called');
-
+public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission)
+  {
+    // Log that the method was called.
+    \Drupal::logger('pfe_med_connect')->notice('submitForm called.2');
     $values = $webform_submission->getData();
-    $product = $values['product'];
-    $therapeuticArea = $values['therapeutic_area'];
-    $department = $values['department'];
+    // DEBUG: Log the form data.
+    \Drupal::logger('pfe_med_connect')->notice('Form data: <pre>@data</pre>', ['@data' => print_r($values, TRUE)]);
 
-    \Drupal::logger('pfe_med_connect')->notice('Form values fetched: Product - ' . $product . ', Therapeutic Area - ' . $therapeuticArea . ', Department - ' . $department);
-    
-    $emailData = $this->getEmailData($product, $therapeuticArea, $department);
-    \Drupal::logger('pfe_med_connect')->notice('Email data fetched: ' . print_r($emailData, TRUE));
+    // Get the form values.
+    $product = $values['nom_du_medicament_ou_produit'];
+    $therapeutic_area = $values['aire_therapeutique'];
+    $departement = $values['departement'];
 
-    if ($emailData) {
-      $this->sendEmail($emailData);
-      \Drupal::logger('pfe_med_connect')->notice('Emails sent successfully');
+    // Query the database.
+    $query = \Drupal::database()->select('custom_table', 'ct');
+
+    // Add the condition for the departement.
+    $query->condition('ct.Departement', $departement);
+
+    if (!empty($product) && empty($therapeutic_area)) {
+      // Scenario 1: The user selects the product and keeps the therapeutics area field empty.
+      $query->condition('ct.Produit', $product);
+    } elseif (empty($product) && !empty($therapeutic_area)) {
+      // Scenario 2: The user selects the therapeutics area and keeps the Product field empty.
+      $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+      $query->isNull('ct.Produit');
     } else {
-      \Drupal::logger('pfe_med_connect')->notice('No email data found');
+      // Scenario 3: The user selects the product and therapeutics area.
+      $query->condition('ct.Produit', $product);
+      $query->condition('ct.Aire_therapeutique', $therapeutic_area);
     }
 
-  } catch (\Exception $e) {
-    \Drupal::logger('pfe_med_connect')->error('Error in submitForm: ' . $e->getMessage());
+    $query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
+
+    $results = $query->execute()->fetchAll();
+
+    if (!empty($results)) {
+      // Prepare the mail parameters.
+      $params = [
+        'values' => $values,
+      ];
+
+      foreach ($results as $result) {
+        // Send a mail to the MSL email.
+        $this->mailManager->mail('pfe_med_connect', 'notification', $result->RMR_adresse_email, 'en', $params);
+
+        // Send a mail to the Backup email.
+        $this->mailManager->mail('pfe_med_connect', 'notification', $result->Backup_adresse_email, 'en', $params);
+      }
+    }
   }
-}
-
-
-
-
-
-public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-  \Drupal::logger('pfe_med_connect')->notice('submitForm was called');
-  
-  // Start of your code...
-
-  \Drupal::logger('pfe_med_connect')->notice('Email data fetched from the form');
-
-  // After fetching email data...
-
-  \Drupal::logger('pfe_med_connect')->notice('Emails sent successfully');
-
-  // Rest of your code...
-}
-
-
-
-
-try {
-  // Your code...
-} catch (\Exception $e) {
-  \Drupal::logger('pfe_med_connect')->error('Error while executing submitForm: ' . $e->getMessage());
-}
-
-
-
-
-$email_data = // Code to fetch email data from the form...
-\Drupal::logger('pfe_med_connect')->notice('Email data: ' . print_r($email_data, TRUE));
