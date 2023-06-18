@@ -1,22 +1,17 @@
-public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
-    // Log that the method was called.
-    \Drupal::logger('pfe_med_connect')->notice('submitForm called.');    
-  
-    // Check the 'plugin.manager.mail' service.
-    $mailManager = \Drupal::service('plugin.manager.mail');
-    if (isset($mailManager)) {
-      \Drupal::logger('pfe_med_connect')->notice('plugin.manager.mail exists and is working correctly.');
-    } else {
-      \Drupal::logger('pfe_med_connect')->error('plugin.manager.mail does not exist or is not working correctly.');
-    }
+$exists = \Drupal::hasService('plugin.manager.mail');
+if ($exists) {
+  \Drupal::logger('pfe_med_connect')->notice('plugin.manager.mail exists and is working correctly');
+} else {
+  \Drupal::logger('pfe_med_connect')->error('plugin.manager.mail does not exist or is not working correctly');
+}
 
-    // Check the 'renderer' service.
-    $renderer = \Drupal::service('renderer');
-    if (isset($renderer)) {
-      \Drupal::logger('pfe_med_connect')->notice('renderer exists and is working correctly.');
-    } else {
-      \Drupal::logger('pfe_med_connect')->error('renderer does not exist or is not working correctly.');
-    }
+$exists = \Drupal::hasService('renderer');
+if ($exists) {
+  \Drupal::logger('pfe_med_connect')->notice('renderer exists and is working correctly');
+} else {
+  \Drupal::logger('pfe_med_connect')->error('renderer does not exist or is not working correctly');
+}
+
 
 Drupal\Core\Entity\EntityStorageException: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'state-twig_extension_hash_prefix' for key 'PRIMARY': INSERT INTO "key_value" ("name", "collection", "value") VALUES (:db_insert_placeholder_0, :db_insert_placeholder_1, :db_insert_placeholder_2); Array ( [:db_insert_placeholder_0] => twig_extension_hash_prefix [:db_insert_placeholder_1] => state [:db_insert_placeholder_2] => a:2:{s:19:"twig_extension_hash";s:43:"Crr1-daw69U15cnjsLhsmqp-cxOeKVsef4iwb2CovIk";s:17:"twig_cache_prefix";s:13:"648f48c99d356";} ) in Drupal\Core\Entity\Sql\SqlContentEntityStorage->save() (line 815 of core\lib\Drupal\Core\Entity\Sql\SqlContentEntityStorage.php).
     
