@@ -1,4 +1,17 @@
-elseif (!empty($product) && !empty($therapeutic_area)) {
+// Add the condition for the departement.
+$query->condition('ct.Departement', $departement);
+
+if (!empty($product) && !empty($therapeutic_area)) {
+  // The user selects both the product and the therapeutic area.
   $query->condition('ct.Produit', $product);
   $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+} else {
+  if (!empty($product)) {
+    // The user only selects the product.
+    $query->condition('ct.Produit', $product);
+  } 
+  if (!empty($therapeutic_area)) {
+    // The user only selects the therapeutic area.
+    $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+  }
 }
