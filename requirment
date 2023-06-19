@@ -1,3 +1,23 @@
-If the HCP selects the product and keep the therapeutics area field empty, then the algo will search for the MSL and backup email addresses that match the product & district filled in by the HCP and send an email to them.
-If the HCP selects the therapeutics area and keep the Product field empty, then the algo will search for the MSL and backup email addresses matching the therapeutic area & district selected by the HCP and for which the product field is empty and send an email to them.
-If the HCP selects the product and therapeutics area, then the algo will search for the MSL and backup email addresses matching the product & district selected by the HCP and send an email to them.
+// Get the form values.
+$product = $values['nom_du_medicament_ou_produit'];
+$therapeutic_area = $values['aire_therapeutique'];
+$departement = $values['departement'];
+
+// Query the database.
+$query = \Drupal::database()->select('custom_table', 'ct');
+
+// Add the condition for the departement.
+$query->condition('ct.Departement', $departement);
+
+if (!empty($product)) {
+  // The user selects the product.
+  $query->condition('ct.Produit', $product);
+} 
+if (!empty($therapeutic_area)) {
+  // The user selects the therapeutics area.
+  $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+}
+
+$query->fields('ct', ['RMR_adresse_email', 'Backup_adresse_email']);
+
+$results = $query->execute()->fetchAll();
