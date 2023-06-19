@@ -1,8 +1,4 @@
-	pfe_med_connect	06/18/2023 - 23:23	CustomEmailHandler constructed.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:21	Emails sent.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	Query results: Array ( [0] => stdClass Object…	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	The SQL query: SELECT "ct"."RMR_adresse_email" AS "…	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	Extracted form values: Product - Vydura (rimegepant),…	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	Form data: Array ( [subject] => […	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	submitForm called.	pfizer-admin	
-pfe_med_connect	06/18/2023 - 23:20	CustomEmailHandler constructed.	pfizer-admin	
+elseif (!empty($product) && !empty($therapeutic_area)) {
+  $query->condition('ct.Produit', $product);
+  $query->condition('ct.Aire_therapeutique', $therapeutic_area);
+}
