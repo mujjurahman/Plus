@@ -1,7 +1,181 @@
-use Drupal\Core\Form\FormStateInterface; use Drupal\Core\Database\Database; use Drupal\Core\Database\SchemaException; use Drupal\Core\Database\Query\Condition; use Drupal\Core\Database\Query\Select; use Drupal\Core\Mail\MailManagerInterface; use Drupal\Core\Render\RenderContext; use Drupal\Core\Render\RendererInterface; use Drupal\Core\Url; use Symfony\Component\DependencyInjection\ContainerInterface; use Drupal\file\Entity\File; /** * Implements hook_form_FORM_ID_alter() for the custom form. */ function pfe_med_connect_form_pfe_med_connect_form_alter(&$form, FormStateInterface $form_state, $form_id) { $form['#submit'][] = 'pfe_med_connect_form_submit'; } /** * Form submission handler for the custom form. */ function pfe_med_connect_form_submit(&$form, FormStateInterface $form_state) { $csv_file = $form_state->getValue('csv_file'); if (!empty($csv_file)) { $file = File::load($csv_file->id()); if ($file) { $file_path = $file->getFileUri(); // Process the CSV file. $data = pfe_med_connect_process_csv_file($file_path); if (!empty($data)) { // Truncate the custom_table before inserting new data. pfe_med_connect_truncate_table(); // Insert the data into the custom_table. pfe_med_connect_insert_data($data); \Drupal::messenger()->addMessage('CSV data has been processed and stored in the custom_table.'); } else { \Drupal::messenger()->addError('Failed to process the CSV file or no data found.'); } } else { \Drupal::messenger()->addError('Failed to load the uploaded file.'); } } else { \Drupal::messenger()->addError('No CSV file uploaded.'); } } /** * Process the CSV file and return the data as an array. */ function pfe_med_connect_process_csv_file($file_path) { $data = []; if (($handle = fopen($file_path, 'r')) !== FALSE) { while (($row = fgetcsv($handle, 1000, ',')) !== FALSE) { // Skip the header row. if ($row[0] !== 'Produit') { $data[] = [ 'Produit' => $row[0], 'Aire_therapeutique' => $row[1], 'Departement' => $row[2], 'RMR_adresse_email' => $row[3], 'Backup_adresse_email' => $row[4], ]; } } fclose($handle); } return $data; } /** * @file * Contains pfe_med_connect.module. */ use Drupal\Core\Routing\RouteMatchInterface; /** * Implements hook_help(). */ function pfe_med_connect_help($route_name, RouteMatchInterface $route_match) { switch ($route_name) { // Main module help for the pfe_med_connect module. case 'help.page.pfe_med_connect': $output = ''; $output .= '
-' . t('About') . '
-'; $output .= '
-' . t('Custom Webform Handler for PFE Med Connect module.') . '
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Database\Database;
+use Drupal\Core\Database\SchemaException;
+use Drupal\Core\Database\Query\Condition;
+use Drupal\Core\Database\Query\Select;
+use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\file\Entity\File;
 
-'; return $output; default: } } /** * Implements hook_mail(). */ function pfe_med_connect_mail($key, &$message, $params) { switch ($key) { case 'notification': $message['subject'] = t('MedConnect: Proposition du corps du message qui sera envoyé au MSL et son backup'); $message['body'][] = t('Bonjour, Vous venez de recevoir une sollicitation de la part d’un professionnel de santé exerçant dans votre région. Merci de vérifier la véracité des informations ci-dessous (nom, prénom, RPPS) et prendre contact avec lui dans les plus bref délais. Civilité : @civilite Prénom : @prenom Nom : @nom Adresse email : @email RPPS : @rpps Pays : @pays Département : @departement Message : @message Bien cordialement, Pfizer Médical Bien à toi, Adel', [ '@civilite' => $params['values']['civilite'], '@prenom' => $params['values']['first_name'], '@nom' => $params['values']['name'], '@email' => $params['values']['email'], '@rpps' => $params['values']['rpps'], '@pays' => $params['values']['payss'], '@departement' => $params['values']['departement'], '@message' => $params['values']['message'], ]); break; } } /** * Truncate the custom_table. */ function pfe_med_connect_truncate_table() { $table_name = 'custom_table'; try { $connection = Database::getConnection(); $connection->truncate($table_name)->execute(); } catch (DatabaseException $e) { \Drupal::messenger()->addError('Failed to truncate the custom_table: ' . $e->getMessage()); } } /** * Insert the data into the custom_table. */ function pfe_med_connect_insert_data($data) { $table_name = 'custom_table'; try { $connection = Database::getConnection(); foreach ($data as $row) { $connection->insert($table_name) ->fields([ 'Produit' => $row['Produit'], 'Aire_therapeutique' => $row['Aire_therapeutique'], 'Departement' => $row['Departement'], 'RMR_adresse_email' => $row['RMR_adresse_email'], 'Backup_adresse_email' => $row['Backup_adresse_email'], ]) ->execute(); \Drupal::messenger()->addMessage('Inserted row: ' . print_r($row, TRUE)); } } catch (DatabaseException $e) { \Drupal::messenger()->addError('Failed to insert data into the custom_table: ' . $e->getMessage()); } } The website encountered an unexpected error. Please try again later.
-RuntimeException: Failed to start the session because headers have already been sent by "D:\xampp\htdocs\pfpfpfizerfr\app\profiles\pfpfpfizerfr_profile\modules\pfe_med_connect\pfe_med_connect.module" at line 1. in Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage->start() (line 152 of D:\xampp\htdocs\pfpfpfizerfr\vendor\symfony\http-foundation\Session\Storage\NativeSessionStorage.php).
+/**
+ * Implements hook_form_FORM_ID_alter() for the custom form.
+ */
+function pfe_med_connect_form_pfe_med_connect_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['#submit'][] = 'pfe_med_connect_form_submit';
+}
+
+/**
+ * Form submission handler for the custom form.
+ */
+function pfe_med_connect_form_submit(&$form, FormStateInterface $form_state) {
+  $csv_file = $form_state->getValue('csv_file');
+
+  if (!empty($csv_file)) {
+    $file = File::load($csv_file->id());
+
+    if ($file) {
+      $file_path = $file->getFileUri();
+
+      // Process the CSV file.
+      $data = pfe_med_connect_process_csv_file($file_path);
+
+      if (!empty($data)) {
+        // Truncate the custom_table before inserting new data.
+        pfe_med_connect_truncate_table();
+
+        // Insert the data into the custom_table.
+        pfe_med_connect_insert_data($data);
+
+        \Drupal::messenger()->addMessage('CSV data has been processed and stored in the custom_table.');
+      } else {
+        \Drupal::messenger()->addError('Failed to process the CSV file or no data found.');
+      }
+    } else {
+      \Drupal::messenger()->addError('Failed to load the uploaded file.');
+    }
+  } else {
+    \Drupal::messenger()->addError('No CSV file uploaded.');
+  }
+}
+
+/**
+ * Process the CSV file and return the data as an array.
+ */
+function pfe_med_connect_process_csv_file($file_path) {
+  $data = [];
+
+  if (($handle = fopen($file_path, 'r')) !== FALSE) {
+    while (($row = fgetcsv($handle, 1000, ',')) !== FALSE) {
+      // Skip the header row.
+      if ($row[0] !== 'Produit') {
+        $data[] = [
+          'Produit' => $row[0],
+          'Aire_therapeutique' => $row[1],
+          'Departement' => $row[2],
+          'RMR_adresse_email' => $row[3],
+          'Backup_adresse_email' => $row[4],
+        ];
+      }
+    }
+
+    fclose($handle);
+  }
+
+  return $data;
+}
+
+/**
+ * @file
+ * Contains pfe_med_connect.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function pfe_med_connect_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the pfe_med_connect module.
+    case 'help.page.pfe_med_connect':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Custom Webform Handler for PFE Med Connect module.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function pfe_med_connect_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'notification':
+      $message['subject'] = t('MedConnect: Proposition du corps du message qui sera envoyé au MSL et son backup');
+      
+      $message['body'][] = t('Bonjour,
+
+Vous venez de recevoir une sollicitation de la part d’un professionnel de santé exerçant dans votre région. Merci de vérifier la véracité des informations ci-dessous (nom, prénom, RPPS) et prendre contact avec lui dans les plus bref délais.
+
+Civilité : @civilite
+Prénom : @prenom
+Nom : @nom
+Adresse email : @email
+RPPS : @rpps
+Pays : @pays
+Département :  @departement
+Message : @message
+
+Bien cordialement,
+Pfizer Médical
+
+Bien à toi,
+Adel', [
+        '@civilite' => $params['values']['civilite'],
+        '@prenom' => $params['values']['first_name'],
+        '@nom' => $params['values']['name'],
+        '@email' => $params['values']['email'],
+        '@rpps' => $params['values']['rpps'],
+        '@pays' => $params['values']['payss'],
+        '@departement' => $params['values']['departement'],
+        '@message' => $params['values']['message'],
+      ]);
+      break;
+  }
+}
+
+/**
+ * Truncate the custom_table.
+ */
+function pfe_med_connect_truncate_table() {
+  $table_name = 'custom_table';
+
+  try {
+    $connection = Database::getConnection();
+    $connection->truncate($table_name)->execute();
+  }
+  catch (DatabaseException $e) {
+    \Drupal::messenger()->addError('Failed to truncate the custom_table: ' . $e->getMessage());
+  }
+}
+
+/**
+ * Insert the data into the custom_table.
+ */
+function pfe_med_connect_insert_data($data) {
+  $table_name = 'custom_table';
+
+  try {
+    $connection = Database::getConnection();
+    foreach ($data as $row) {
+      $connection->insert($table_name)
+        ->fields([
+          'Produit' => $row['Produit'],
+          'Aire_therapeutique' => $row['Aire_therapeutique'],
+          'Departement' => $row['Departement'],
+          'RMR_adresse_email' => $row['RMR_adresse_email'],
+          'Backup_adresse_email' => $row['Backup_adresse_email'],
+        ])
+        ->execute();
+      \Drupal::messenger()->addMessage('Inserted row: ' . print_r($row, TRUE));
+    }
+  }
+  catch (DatabaseException $e) {
+    \Drupal::messenger()->addError('Failed to insert data into the custom_table: ' . $e->getMessage());
+  }
+}
