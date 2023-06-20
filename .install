@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the pfe_med_connect module.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\Core\Database\SchemaException;
+
+/**
+ * Implements hook_install().
+ */
+function pfe_med_connect_install() {
+  pfe_med_connect_create_table();
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function pfe_med_connect_update_8001() {
+  pfe_med_connect_create_table();
+}
+
+/**
+ * Create the custom table.
+ */
+function pfe_med_connect_create_table() {
+  $table_name = 'custom_table';
+  $schema = \Drupal::database()->schema();
+
+  try {
+    if ($schema->tableExists($table_name)) {
+      $schema->dropTable($table_name);
+    }
+    $schema->createTable($table_name, pfe_med_connect_get_table_schema());
+    \Drupal::messenger()->addMessage('Created the custom table.');
+  }
+  catch (SchemaException $e) {
+    \Drupal::messenger()->addError('Failed to create the custom table: ' . $e->getMessage());
+  }
+}
+
+/**
+ * Get the schema definition for the custom table.
+ */
+function pfe_med_connect_get_table_schema() {
+  $schema = [
+    'description' => 'Custom table for storing data.',
+    'fields' => [
+      'Produit' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The product name.',
+      ],
+      'Aire_therapeutique' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The therapeutic area.',
+      ],
+      'Departement' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The department.',
+      ],
+      'RMR_adresse_email' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The MSL email address.',
+      ],
+      'Backup_adresse_email' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The backup email address.',
+      ],
+    ],
+    'primary key' => ['Produit', 'Aire_therapeutique', 'Departement'],
+  ];
+
+  return $schema;
+}
